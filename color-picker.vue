@@ -1,67 +1,108 @@
 <template>
     <div class="pad">
-        <div class="preview" v-bind:style="{'background': color}">{{`R: ${this.r} G: ${this.g} B: ${this.b}`}}</div>
-        <div class="adjust">
-            <input type="range" min="0" max="255" v-model="r">
-            <input type="range" min="0" max="255" v-model="g">
-            <input type="range" min="0" max="255" v-model="b">
-        </div>
+        <div class="mode" @click="toggleMode">{{this.isRGB ? 'RGB' : 'HSL'}}</div>
+        <rgb-picker :change="toHsl" :give-rgb="changeFromRgb" :recv-rgb="rgb" v-show="isRGB"></rgb-picker>
+        <hsl-picker :change="toRgb" :give-hsl="changeFromHsl" :recv-hsl="hsl" v-show="!isRGB"></hsl-picker>
     </div>
 </template>
 <script>
+import rgbPicker from "./rgb-picker.vue";
+import hslPicker from "./hsl-picker.vue";
 export default {
-    name: 'color-picker',
-    data: function () {
-        return {
-            r: 50,
-            g: 236,
-            b: 252
-        }
+  name: "color-picker",
+  components: {
+    rgbPicker,
+    hslPicker
+  },
+  data: function() {
+    return {
+      rgb: "",
+      hsl: "",
+      isRGB: true,
+      toHsl: true,
+      toRgb: false
+    };
+  },
+  methods: {
+    toggleMode() {
+      if (this.isRGB) {
+        this.toHsl = !this.toHsl;
+      } else {
+        this.toRgb = !this.toRgb;
+      }
+      this.isRGB = !this.isRGB;
     },
-    computed: {
-        color() {
-            return `rgb(${this.r}, ${this.g}, ${this.b})`
+    changeFromRgb(rgb) {
+      let hsl = this.rgb2hsl(rgb.r, rgb.g, rgb.b);
+      this.hsl = { h: hsl.h * 100, s: hsl.s * 100, l: hsl.l * 100 };
+    },
+    changeFromHsl(hsl) {
+      this.rgb = this.hsl2rgb(
+        hsl.h / 100,
+        hsl.s / 100,
+        hsl.l / 100
+      );
+    },
+    //参考https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
+    hsl2rgb(h, s, l) {
+      let r, g, b;
+      if (s == 0) {
+        r = g = b = l;
+      } else {
+        let hue2rgb = function hue2rgb(p, q, t) {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1 / 6) return p + (q - p) * 6 * t;
+          if (t < 1 / 2) return q;
+          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+          return p;
+        };
+        let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        let p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1 / 3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1 / 3);
+      }
+      return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+      };
+    },
+    rgb2hsl(r, g, b) {
+      (r /= 255), (g /= 255), (b /= 255);
+      let max = Math.max(r, g, b),
+        min = Math.min(r, g, b);
+      let h,
+        s,
+        l = (max + min) / 2;
+      if (max == min) {
+        h = s = 0;
+      } else {
+        let d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r:
+            h = (g - b) / d + (g < b ? 6 : 0);
+            break;
+          case g:
+            h = (b - r) / d + 2;
+            break;
+          case b:
+            h = (r - g) / d + 4;
+            break;
         }
+        h /= 6;
+      }
+      return { h, s, l };
     }
-
-}
+  }
+};
 </script>
 <style scoped>
-.pad, .adjust {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-}
-.preview {
-    width: 255px;
-    height: 160px;
-}
-input[type=range]:focus {
-    outline: none;
-}
-input[type=range] {
-    -webkit-appearance: none;
-    width: 255px;
-    border-radius: 10px; /*这个属性设置使填充进度条时的图形为圆角*/
-}
-input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-}    
-
-input[type=range]::-webkit-slider-runnable-track {
-    height: 20px;
-    border-radius: 10px; /*将轨道设为圆角的*/
-    background: #fcfcfc; 
-    box-shadow: 0 1px 1px #def3f8, inset 0 .125em .125em #0d1112; /*轨道内置阴影效果*/
-}
-input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    height: 20px;
-    width: 20px;
-    margin-top: 0px; /*使滑块超出轨道部分的偏移量相等*/
-    background: #ffffff; 
-    border-radius: 50%; /*外观设置为圆形*/
-    border: solid 2px rgba(205, 224, 230, 0.5); /*设置边框*/
-    box-shadow: 0 .125em .125em #3b4547; /*添加底部阴影*/
+.pad {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }
 </style>
