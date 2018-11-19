@@ -1,12 +1,12 @@
 <template>
-    <div class="pad">
-        <div class="preview" v-bind:style="{'background': color}"><p>{{this.hsl}}</p></div>
-        <div class="adjust">
-            <input type="range" min="0" max="100" v-model="h">
-            <input type="range" min="0" max="100" v-model="s">
-            <input type="range" min="0" max="100" v-model="l">
-        </div>
+  <div class="pad">
+    <div class="preview" :style="{'background': color}"><p>{{this.hsl}}</p></div>
+    <div class="adjust">
+      <div class="bkgd" :style="styleH"><input type="range" min="0" max="100" v-model="h"></div>
+      <div class="bkgd" :style="styleS"><input type="range" min="0" max="100" v-model="s"></div>
+      <div class="bkgd" :style="styleL"><input type="range" min="0" max="100" v-model="l"></div>
     </div>
+  </div>
 </template>
 <script>
 export default {
@@ -26,7 +26,37 @@ export default {
     hsl() {
       return `H: ${(this.h * 3.6).toFixed(0)} S: ${parseInt(this.s).toFixed(
         0
-)}% L: ${parseInt(this.l).toFixed(0)}%`;
+      )}% L: ${parseInt(this.l).toFixed(0)}%`;
+    },
+    styleH() {
+      return {
+        background: `linear-gradient(to right,
+        hsl(0, ${this.s}%, ${this.l}%),
+        hsl(51, ${this.s}%, ${this.l}%),
+        hsl(103, ${this.s}%, ${this.l}%),
+        hsl(154, ${this.s}%, ${this.l}%),
+        hsl(205, ${this.s}%, ${this.l}%),
+        hsl(256, ${this.s}%, ${this.l}%),
+        hsl(307, ${this.s}%, ${this.l}%),
+        hsl(360, ${this.s}%, ${this.l}%)
+        )`
+      };
+    },
+    styleS() {
+      return {
+        background: `linear-gradient(to right,
+        hsl(${this.h * 3.6}, 0%, ${this.l}%),
+        hsl(${this.h * 3.6}, 100%, ${this.l}%)
+        )`
+      };
+    },
+    styleL() {
+      return {
+        background: `linear-gradient(to right,
+        hsl(${this.h * 3.6}, ${this.s}%, 0%),
+        hsl(${this.h * 3.6}, ${this.s}%, 100%)
+        )`
+      };
     }
   },
   watch: {
@@ -52,8 +82,9 @@ export default {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 255px;
+  width: 256px;
   height: 160px;
+  border-radius:20px;
 }
 .preview > p {
   font-size: 20px;
@@ -61,41 +92,44 @@ export default {
   text-shadow: 0 0 3px #5c5c5c;
   text-align: center;
 }
-input[type="range"] {
-  -webkit-appearance: none;
-  width: 255px;
-  border-radius: 10px; /*这个属性设置使填充进度条时的图形为圆角*/
+.bkgd {
+  width: 256px;
+  height: 20px;
+  border-radius: 10px; 
+  margin-top: 5px;
 }
 input[type="range"]:focus {
   outline: none;
 }
-input[type="range"]::-webkit-slider-runnable-track {
-  height: 4px;
-  margin-top: 15px;
-  border-radius: 2px; /*将轨道设为圆角的*/
-  background: #b4b4b4;
-}
-input[type="range"]::-ms-track {
-  height: 4px;
-  margin-top: 15px;
-  border-radius: 2px; /*将轨道设为圆角的*/
-  background: #b4b4b4;
+input[type="range"] {
+  -webkit-appearance: none;
+  margin: 0;
+  border: 0;
+  height: 20px;
+  width: 256px;
+  background: transparent;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  position: relative;
-  top: -8px;
+  margin: 0;
+  border: 2px;
   height: 20px;
   width: 20px;
-  background: #eeeeee;
-  border-radius: 50%; /*外观设置为圆形*/
+  border-color: #ffffff;
+  border-style: solid;
+  border-radius: 10px; 
+  background: transparent;
+  cursor: pointer;
 }
 input[type="range"]::-ms-thumb {
-  position: relative;
-  top: -8px;
+  margin: 0;
+  border: 2px;
   height: 20px;
   width: 20px;
-  background: #eeeeee;
-  border-radius: 50%; /*外观设置为圆形*/
+  border-color: #ffffff;
+  border-style: solid;
+  border-radius: 10px; 
+  background: transparent;
+  cursor: pointer;
 }
 </style>

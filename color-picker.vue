@@ -1,5 +1,5 @@
 <template>
-    <div class="pad">
+    <div class="whole">
         <div class="mode" @click="toggleMode">{{this.isRGB ? 'RGB' : 'HSL'}}</div>
         <rgb-picker :change="toHsl" :give-rgb="changeFromRgb" :recv-rgb="rgb" v-show="isRGB"></rgb-picker>
         <hsl-picker :change="toRgb" :give-hsl="changeFromHsl" :recv-hsl="hsl" v-show="!isRGB"></hsl-picker>
@@ -100,9 +100,19 @@ export default {
 };
 </script>
 <style scoped>
-.pad {
+.whole {
   display: flex;
   justify-content: center;
   flex-direction: column;
+  width: 256px;
+  padding: 10px 5px 10px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px grey;
+}
+.mode {
+  text-align: center;
+  color: darkgray;
+  font-size: 24px;
+  cursor: pointer;
 }
 </style>
